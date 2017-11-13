@@ -1,0 +1,8 @@
+{
+	var a: integer
+	integer func f = a*2;
+
+	a := 5
+	put a
+	put f
+}

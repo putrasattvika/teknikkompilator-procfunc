@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+	echo "usage: $0 [filename]"
+else
+	cat $1 | java TeknikKompilator.parser
+fi
