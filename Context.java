@@ -45,14 +45,17 @@ class Context
                 lexicalLevel++;
                 orderNumber = 0;
                 break;
+
             case 1:
                 if (printSymbols)
                     symbolHash.print(lexicalLevel);
                 break;
+
             case 2:
                 symbolHash.delete(lexicalLevel);
                 lexicalLevel--;
                 break;
+
             case 3:
                 if (symbolHash.isExist(currentStr, lexicalLevel))
                 {
@@ -68,12 +71,15 @@ class Context
                 }
                 symbolStack.push(currentStr);
                 break;
+
             case 4:
                 symbolHash.find(currentStr).setLLON(lexicalLevel, orderNumber);
                 break;
+
             case 5:
                 symbolHash.find(currentStr).setIdType(((Integer)typeStack.peek()).intValue());
                 break;
+
             case 6:
                 if (!symbolHash.isExist(currentStr))
                 {
@@ -88,21 +94,27 @@ class Context
                     symbolStack.push(currentStr);
                 }
                 break;
+
             case 7:
                 symbolStack.pop();
                 break;
+
             case 8:
                 typeStack.push(new Integer(symbolHash.find(currentStr).getIdType()));
                 break;
+
             case 9:
                 typeStack.push(new Integer(Bucket.INTEGER));
                 break;
+
             case 10:
                 typeStack.push(new Integer(Bucket.BOOLEAN));
                 break;
+
             case 11:
                 typeStack.pop();
                 break;
+
             case 12:
                 switch (((Integer)typeStack.peek()).intValue())
                 {
@@ -116,6 +128,7 @@ class Context
                         break;
                 }
                 break;
+
             case 13:
                 switch (((Integer)typeStack.peek()).intValue())
                 {
@@ -129,6 +142,7 @@ class Context
                         break;
                 }
                 break;
+
             case 14:
                 int temp = ((Integer)typeStack.pop()).intValue();
                 if (temp != ((Integer)typeStack.peek()).intValue())
@@ -138,6 +152,7 @@ class Context
                 }
                 typeStack.push(new Integer(temp));
                 break;
+
             case 15:
                 temp = ((Integer)typeStack.pop()).intValue();
                 if ((temp != Bucket.INTEGER) && ((Integer)typeStack.peek()).intValue() != Bucket.INTEGER)
@@ -147,6 +162,7 @@ class Context
                 }
                 typeStack.push(new Integer(temp));
                 break;
+
             case 16:
                 temp = symbolHash.find((String)symbolStack.peek()).getIdType();
                 if (temp != ((Integer)typeStack.peek()).intValue())
@@ -155,6 +171,7 @@ class Context
                     errorCount++;
                 }
                 break;
+
             case 17:
                 temp = symbolHash.find((String)symbolStack.peek()).getIdType();
                 if (temp != Bucket.INTEGER)
@@ -163,14 +180,17 @@ class Context
                     errorCount++;
                 }
                 break;
+
             case 18:
                 symbolHash.find(currentStr).setIdKind(Bucket.SCALAR);
                 orderNumber++;
                 break;
+
             case 19:
                 symbolHash.find(currentStr).setIdKind(Bucket.ARRAY);
                 orderNumber += 3;
                 break;
+
             case 20:
                 switch (symbolHash.find((String)symbolStack.peek()).getIdKind())
                 {
@@ -184,6 +204,7 @@ class Context
                         break;
                 }
                 break;
+
             case 21:
                 switch (symbolHash.find((String)symbolStack.peek()).getIdKind())
                 {
@@ -195,6 +216,48 @@ class Context
                         System.out.println("Array variable expected at line " + currentLine + ": " + currentStr);
                         errorCount++;
                         break;
+                }
+                break;
+
+            case 22:
+                // insert procedure lexical level and order number to symbol table
+                symbolHash.find(currentStr).setLLON(lexicalLevel, orderNumber);
+                orderNumber++;
+
+                break;
+            
+            case 24:
+                // insert procedure to symbol table, set type and kind
+                if (symbolHash.isExist(currentStr, lexicalLevel)) {
+                    System.out.println("Procedure declared at line " + currentLine + ": " + currentStr);
+                    errorCount++;
+                    System.err.println("\nProcess terminated.\nAt least " + (errorCount + parser.yylex.num_error)
+                                       + " error(s) detected.");
+                    System.exit(1);
+                }
+
+                symbolHash.insert(new Bucket(currentStr));
+                symbolHash.find(currentStr).setIdType(Bucket.UNDEFINED);
+                symbolHash.find(currentStr).setIdKind(Bucket.PROCEDURE);
+                symbolHash.find(currentStr).setArgc(0);
+                
+                symbolStack.push(currentStr);
+                break;
+
+            case 28:
+                // check whether identifier is a procedure
+                if (symbolHash.find((String)symbolStack.peek()).getIdKind() != Bucket.PROCEDURE) {
+                    System.out.println("Procedure expected at line " + currentLine + ": " + currentStr);
+                    errorCount++;
+                }
+                break;
+
+            case 29:
+                // check whether procedure doesn't have any args
+                // context: procedure w/o args
+                if (symbolHash.find((String)symbolStack.peek()).getArgc() != 0) {
+                    System.out.println("Procedure without arguments " + currentLine + ": " + currentStr);
+                    errorCount++;
                 }
                 break;
         }

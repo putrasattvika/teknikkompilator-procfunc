@@ -81,6 +81,25 @@ class Hash
         }
     }
 
+    public Bucket find(String idName, int lexicLev)
+    {
+        if (idName == null) {
+            return null;
+        }
+
+        int index = hashFunction(idName);
+        Bucket temp = item[index];
+
+        while (temp != null) {
+            if (temp.getIdName().equals(idName) && temp.getLexicLev() == lexicLev)
+                break;
+
+            temp = temp.getNextBucket();
+        }
+
+        return temp;
+    }
+
     public Bucket find(String idName)
     {
         int index = hashFunction(idName);

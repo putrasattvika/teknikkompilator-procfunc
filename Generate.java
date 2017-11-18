@@ -26,6 +26,7 @@ class Generate
           returnAddrStack   = new int[stackSize]; // fixing up/backpatching return address
 
     int ll, on, top, addr, kode, cell;
+    Bucket func;
     private String currConst;
 
     public Generate()
@@ -221,6 +222,7 @@ class Generate
     public void R(int ruleNo)
     {
         String teks;
+        int org_cell;
 
         //System.out.println("R" + ruleNo);
         switch(ruleNo)
@@ -235,10 +237,11 @@ class Generate
             //      contruct instructions to enter statement's scope
             case 1:
                 ll = Context.lexicalLevel;
-                if (ll > HMachine.displaySize)
+                org_cell = cell;
+
+                if (ll > HMachine.displaySize) {
                     System.out.println("Too many nested scope.");
-                else
-                {
+                } else {
                     HMachine.memory[cell] = HMachine.NAME;
                     HMachine.memory[cell+1] = ll;
                     HMachine.memory[cell+2] = 0;
@@ -248,7 +251,14 @@ class Generate
 
                     cell = cell + 6;
                     stackPush(scopeMarker, dynamicArrayStack);
-                 }
+                }
+
+                // if a function/procedure, add cell as func/proc address
+                func = Context.symbolHash.find(Context.currentStr, Context.lexicalLevel-1);
+                if (func != null) {
+                    func.setFuncAddr(org_cell);
+                }
+
                 break;
             
             // R2 : check if (lexical level < display size),
@@ -692,6 +702,32 @@ class Generate
                 HMachine.memory[cell+28] = HMachine.ADD;
 
                 cell = cell + 29;
+                break;
+
+            // R42 : construct instructions for returning from called procedure
+            case 42:
+                HMachine.memory[cell+0] = HMachine.BR;
+                cell = cell + 1;
+                break;
+
+            // R44 : construct instructions for calling procedures
+            case 44:
+                func = Context.symbolHash.find(Context.currentStr, Context.lexicalLevel);
+                
+                // store RIP
+                HMachine.memory[cell+0] = HMachine.PUSH;
+                HMachine.memory[cell+1] = cell + 5;
+
+                // jump to proc
+                HMachine.memory[cell+2] = HMachine.PUSH;
+                HMachine.memory[cell+3] = func.getFuncAddr();
+                HMachine.memory[cell+4] = HMachine.BR;
+                cell = cell + 5;
+                break;
+
+            // R45 : construct block for calling procedures
+            case 45:
+                // no-op
                 break;
 
             // R49 : construct instructions similar to R31

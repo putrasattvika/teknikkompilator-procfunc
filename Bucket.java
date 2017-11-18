@@ -47,6 +47,14 @@ class Bucket
         this.idKind = idKind;
     }
 
+    public void setArgc(int argc) {
+        this.argc = argc;
+    }
+
+    public void setFuncAddr(int funcAddr) {
+        this.funcAddr = funcAddr;
+    }
+
     public void setNextBucket()
     {
         nextBucket = null;
@@ -80,6 +88,14 @@ class Bucket
     public int getIdKind()
     {
         return idKind;
+    }
+
+    public int getArgc() {
+        return argc;
+    }
+
+    public int getFuncAddr() {
+        return funcAddr;
     }
 
     public String getIdTypeStr()
@@ -149,4 +165,7 @@ class Bucket
     private int idType;
     private int idKind;
     private Bucket nextBucket;
+    private int funcAddr;
+
+    private int argc = -1;
 }

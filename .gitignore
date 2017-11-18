@@ -2,3 +2,4 @@
 /Scanner.lex.java
 /parser.java
 /sym.java
+/**/*.asm

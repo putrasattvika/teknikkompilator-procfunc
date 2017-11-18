@@ -1,0 +1,21 @@
+{
+	var a: integer
+	proc f {
+		proc f2 {
+			;
+			a := a+3
+		}
+		;
+
+		f2
+		a := a*2
+	}
+
+	;
+
+	a := 5
+	put a
+
+	f
+	put a
+}

@@ -1,0 +1,15 @@
+{
+	var a: integer
+	proc f {
+		;
+		a := a*2
+	}
+
+	;
+
+	a := 5
+	put a
+
+	f
+	put a
+}
