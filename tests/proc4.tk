@@ -1,0 +1,9 @@
+{
+    proc four {
+        var x : integer;
+        x := 25
+        put x
+    }
+    ;
+    four
+}

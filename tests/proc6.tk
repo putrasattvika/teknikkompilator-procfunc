@@ -1,0 +1,15 @@
+{
+	proc f {
+		proc f {
+			;
+            f
+            put "A"
+		}
+		;
+		f
+        put "B"
+	}
+	;
+    f
+	put "C"
+}

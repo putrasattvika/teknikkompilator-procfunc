@@ -1,0 +1,15 @@
+{
+    var x : integer
+
+    proc five {
+        var y : integer;
+        y := 0
+        repeat
+            x := x + 1
+        until x > y
+        put x
+    }
+    ;
+    x := -1
+    five
+}
