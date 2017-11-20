@@ -25,7 +25,7 @@ class Generate
           boundStack        = new int[stackSize], // subscript out of range routine
           returnAddrStack   = new int[stackSize]; // fixing up/backpatching return address
 
-    int ll, on, top, addr, kode, cell;
+    public static int ll, on, top, addr, kode, cell;
     Bucket func;
     private String currConst;
 
@@ -281,6 +281,7 @@ class Generate
                     cell = cell + 8;
                     stackPush(scopeMarker, dynamicArrayStack);
                  }
+
                 break;
 
             // R3 : construct instructions to allocate variable
@@ -709,6 +710,13 @@ class Generate
                 HMachine.memory[cell+0] = HMachine.BR;
                 cell = cell + 1;
                 break;
+            
+            // R43 : construct instructions for returning from called function
+            case 43:
+                HMachine.memory[cell] = HMachine.FLIP; // flip to return value
+                HMachine.memory[cell+1] = HMachine.BR; // branch when function is done
+                cell = cell + 2;
+                break;
 
             // R44 : construct instructions for calling procedures
             case 44:
@@ -730,15 +738,32 @@ class Generate
                 // no-op
                 break;
 
+            // R46: construct block for calling functions
+            case 46:
+                break;
+
+            // R47 : construct instructions for calling function
+            case 47:
+                func = Context.symbolHash.find(Context.currentStr);
+                
+                HMachine.memory[cell] = HMachine.PUSH; // push return addr
+                HMachine.memory[cell+1] = cell + 5; 
+                HMachine.memory[cell+2] = HMachine.PUSH; // push func addr
+                HMachine.memory[cell+3] = func.getFuncAddr();
+                HMachine.memory[cell+4] = HMachine.BR; // branch to func
+                cell = cell + 5;
+                break;
+
             // R49 : construct instructions similar to R31
             //       for non-function identifier
             case 49:
+                
                 kode = Context.symbolHash.find(Context.currentStr).getIdKind();
 
                 if (kode == Bucket.FUNCTION)
-                    System.out.println("Unable to perform function implemetation.");
+                    R(46);
                 else
-                    obtainAddress();
+                    R(31);
 
                 break;
 
@@ -748,11 +773,10 @@ class Generate
                 kode = Context.symbolHash.find(Context.currentStr).getIdKind();
 
                 if (kode == Bucket.FUNCTION)
-                    System.out.println("Unable to perform function implemetation.");
+                    R(47);
                 else
                 {
-                   HMachine.memory[cell] = HMachine.LOAD;
-                   cell = cell + 1;
+                   R(32);
                 }
 
                 break;
