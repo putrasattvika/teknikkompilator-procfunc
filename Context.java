@@ -220,10 +220,13 @@ class Context
                 break;
 
             case 22:
-                // insert procedure lexical level and order number to symbol table
                 symbolHash.find(currentStr).setLLON(lexicalLevel, orderNumber);
                 orderNumber++;
 
+                break;
+            
+            case 23:
+                // implemented in C5
                 break;
             
             case 24:
@@ -243,6 +246,23 @@ class Context
                 
                 symbolStack.push(currentStr);
                 break;
+            
+            case 26:
+                // insert function to symbol table
+                if (symbolHash.isExist(currentStr, lexicalLevel)) {
+                    System.out.println("Function declared at line " + currentLine + ": " + currentStr);
+                    errorCount++;
+                    System.err.println("\nProcess terminated.\nAt least " + (errorCount + parser.yylex.num_error)
+                                       + " error(s) detected.");
+                    System.exit(1);
+                }
+
+                symbolHash.find(currentStr).setIdType(Bucket.UNDEFINED);
+                symbolHash.find(currentStr).setIdKind(Bucket.FUNCTION);
+                symbolHash.find(currentStr).setArgc(0);
+
+                symbolStack.push(currentStr);
+                break;
 
             case 28:
                 // check whether identifier is a procedure
@@ -260,6 +280,41 @@ class Context
                     errorCount++;
                 }
                 break;
+
+            case 33:
+                // checks whether entry in symbol table is a function or not
+                if (symbolHash.find((String)symbolStack.peek()).getIdKind() != Bucket.FUNCTION) {
+                    System.out.println("Function expected at line " + currentLine + ": " + currentStr);
+                    errorCount++;
+                }   
+                break;
+
+            case 36:
+                // checks whether return type matches expression in the function
+                if (symbolHash.find((String)symbolStack.peek()).getIdType() != ((Integer)typeStack.peek()).intValue()) {
+                    System.out.println("Return type does not match at line " + currentLine + ": " + currentStr);
+                    errorCount++;
+                }
+                typeStack.push(new Integer(((Integer)typeStack.peek()).intValue())); // adds to type stack
+                break;
+            
+            case 37:
+                // checks whether identifier is a function or not
+                // if so, go to C33
+                // otherwise, go to C20, treat it as a scalar
+                if(symbolHash.find((String)symbolStack.peek()).getIdKind()==Bucket.FUNCTION) C(33);
+                else C(20);
+                break;
+            
+            case 40:
+                // already handled in C9 (int), C10 (bool)
+                break;
+
+            case 100:
+                // additional rule to set function address
+                symbolHash.find(currentStr).setFuncAddr(Generate.cell);
+                break;
+
         }
     }
 
@@ -289,8 +344,8 @@ class Context
     public static int lexicalLevel;
     public static int orderNumber;
     public static Hash symbolHash;
-    private Stack symbolStack;
-    private Stack typeStack;
+    public static Stack symbolStack;
+    public static Stack typeStack;
     public static String currentStr;
     public static int currentLine;
     private boolean printSymbols;
