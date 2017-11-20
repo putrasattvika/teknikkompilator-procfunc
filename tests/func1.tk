@@ -1,0 +1,6 @@
+{
+    integer func bla = 1
+    integer func blu = 2
+    integer func blabla = bla + blu;
+    put blabla
+}
