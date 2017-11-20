@@ -1,0 +1,22 @@
+{
+	var a: integer
+	var b: integer
+	proc f {
+		;
+
+		if b>0 then
+			a := a*2
+			b := b-1
+			f	
+		end if
+	}
+
+	;
+
+	a := 1
+	b := 5
+	put a
+
+	f
+	put a
+}

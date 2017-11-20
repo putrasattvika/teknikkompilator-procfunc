@@ -236,7 +236,7 @@ class Context
                     System.exit(1);
                 }
 
-                symbolHash.insert(new Bucket(currentStr));
+                // symbolHash.insert(new Bucket(currentStr));
                 symbolHash.find(currentStr).setIdType(Bucket.UNDEFINED);
                 symbolHash.find(currentStr).setIdKind(Bucket.PROCEDURE);
                 symbolHash.find(currentStr).setArgc(0);

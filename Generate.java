@@ -712,7 +712,7 @@ class Generate
 
             // R44 : construct instructions for calling procedures
             case 44:
-                func = Context.symbolHash.find(Context.currentStr, Context.lexicalLevel);
+                func = Context.symbolHash.find(Context.currentStr);
                 
                 // store RIP
                 HMachine.memory[cell+0] = HMachine.PUSH;
