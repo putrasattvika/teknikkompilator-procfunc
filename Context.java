@@ -312,12 +312,6 @@ class Context
             case 40:
                 // already handled in C9 (int), C10 (bool)
                 break;
-
-            case 100:
-                // additional rule to set function address
-                symbolHash.find(currentStr).setFuncAddr(Generate.cell);
-                break;
-
         }
     }
 

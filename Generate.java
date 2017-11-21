@@ -253,9 +253,9 @@ class Generate
                     stackPush(scopeMarker, dynamicArrayStack);
                 }
 
-                // if a function/procedure, add cell as func/proc address
+                // if a procedure, add cell as proc address
                 func = Context.symbolHash.find(Context.currentStr, Context.lexicalLevel-1);
-                if (func != null) {
+                if (func != null && func.getIdKind() == Bucket.PROCEDURE) {
                     func.setFuncAddr(org_cell);
                 }
 
@@ -265,6 +265,8 @@ class Generate
             //      construct instructions to enter expression's scope
             case 2:
                 ll = Context.lexicalLevel;
+                org_cell = cell;
+
                 if (ll > HMachine.displaySize)
                     System.out.println("Too many nested scope.");
                 else
@@ -281,6 +283,12 @@ class Generate
                     cell = cell + 8;
                     stackPush(scopeMarker, dynamicArrayStack);
                  }
+
+                // if a function, add cell as func address
+                func = Context.symbolHash.find(Context.currentStr, Context.lexicalLevel-1);
+                if (func != null && func.getIdKind() == Bucket.FUNCTION) {
+                    func.setFuncAddr(org_cell);
+                }
 
                 break;
 
