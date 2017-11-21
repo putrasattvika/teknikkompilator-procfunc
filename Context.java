@@ -273,11 +273,14 @@ class Context
                 break;
 
             case 29:
-                // check whether procedure doesn't have any args
-                // context: procedure w/o args
-                if (symbolHash.find((String)symbolStack.peek()).getArgc() != 0) {
-                    System.out.println("Procedure without arguments " + currentLine + ": " + currentStr);
-                    errorCount++;
+                // check whether function or procedure doesn't have any args
+                // context: function or procedure w/o args
+                temp = symbolHash.find((String)symbolStack.peek()).getIdKind();
+                if (temp == Bucket.PROCEDURE || temp == Bucket.FUNCTION) {
+                    if (symbolHash.find((String)symbolStack.peek()).getArgc() != 0) {
+                        System.out.println("Procedure without arguments " + currentLine + ": " + currentStr);
+                        errorCount++;
+                    }
                 }
                 break;
 
