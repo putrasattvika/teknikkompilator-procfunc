@@ -1,0 +1,20 @@
+{
+    var v: integer
+    var w: integer
+    var x: integer
+    integer func func2 = {
+        var y: integer
+        var z: integer
+        ;
+        z := 6
+        y := v*(w+x+z);
+        y
+    }
+    ;
+    
+    v := 3
+    w := 4
+    x := 5
+    
+    put func2
+}

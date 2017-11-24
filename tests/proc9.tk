@@ -1,0 +1,25 @@
+{
+    var x : integer
+
+    proc proc9a {
+        var x : integer; 
+        x := 1
+        put x
+    }
+
+    proc proc9b {
+        ;
+        x := 100
+        proc9a
+        put x
+    }
+    ;
+
+    x := 1234
+    
+    proc9a
+    put x
+
+    proc9b
+    put x
+}

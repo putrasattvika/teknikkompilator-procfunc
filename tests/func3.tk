@@ -1,0 +1,21 @@
+{
+    integer func func3 = {
+        integer func func3 = {
+
+            integer func func3 = {
+                var x : integer;
+                x := 123;
+                x
+            }
+            ;
+            put func3;
+            456
+
+        }
+        ;
+        put func3;
+        789
+    }
+    ;
+    put func3
+}
