@@ -25,6 +25,7 @@ class Context
         symbolHash = new Hash(HASH_SIZE);
         symbolStack = new Stack();
         typeStack = new Stack();
+        funcStack = new Stack();
         printSymbols = false;
         errorCount = 0;
     }
@@ -246,7 +247,14 @@ class Context
                 
                 symbolStack.push(currentStr);
                 break;
-            
+
+            case 25:
+                // insert parameter to symbol table / set idKind as parameter
+                symbolHash.insert(new Bucket(currentStr));
+                symbolHash.find(currentStr).setIdKind(Bucket.PARAMETER);
+                orderNumber++;
+                break;
+
             case 26:
                 // insert function to symbol table
                 if (symbolHash.isExist(currentStr, lexicalLevel)) {
@@ -262,6 +270,11 @@ class Context
                 symbolHash.find(currentStr).setArgc(0);
 
                 symbolStack.push(currentStr);
+                break;
+
+            case 27:
+                // Get out of params scope
+                C(2);
                 break;
 
             case 28:
@@ -284,12 +297,57 @@ class Context
                 }
                 break;
 
+            case 30:
+                // push number of argument = 0
+                symbolHash.find(currentStr).setArgc(0);
+                funcStack.push(currentStr);
+                break;
+
+            case 31:
+                // check argument about params
+                if (symbolHash.find((String) symbolStack.peek()).getArgc() < 1) {
+                    System.out.println("debug: Function have no argument " + currentLine + ": " + currentStr);
+                    errorCount++;
+                } else {
+                    System.out.println("debug: Function have argument " + currentLine + ": " + currentStr);
+                    // symbolStack.pop();
+                    temp = symbolHash.find((String) symbolStack.peek()).getIdKind();
+                    if (temp == Bucket.INTEGER || temp == Bucket.BOOLEAN) {
+
+                    }
+                }
+                break;
+
+            case 32:
+                // check wheter all arguments has been seen, pop number of args
+                if (symbolHash.find((String) symbolStack.peek()).getArgc() == 0) {
+                    symbolStack.pop();
+                } else {
+                    System.out.println("debug: Not all arguments are checked " + currentLine + ": " + currentStr);
+                    errorCount++;
+                }
+                break;
+
             case 33:
                 // checks whether entry in symbol table is a function or not
                 if (symbolHash.find((String)symbolStack.peek()).getIdKind() != Bucket.FUNCTION) {
                     System.out.println("Function expected at line " + currentLine + ": " + currentStr);
                     errorCount++;
                 }   
+                break;
+
+            case 34:
+                // add number of argument
+                symbolHash.find((String) funcStack.peek())
+                        .setArgc(symbolHash.find((String) funcStack.peek()).getArgc() + 1);
+                break;
+
+            case 35:
+                // insert number of arguments (params) to symbol table, pop number of arguments
+                symbolHash.insert(new Bucket((String) funcStack.pop()));
+                symbolStack.pop();
+
+                // funcStack.pop();
                 break;
 
             case 36:
