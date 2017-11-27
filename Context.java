@@ -330,6 +330,7 @@ class Context {
             // insert number of arguments (params) to symbol table, pop number of arguments
             symbolHash.insert(new Bucket((String) funcStack.pop()));
             symbolStack.pop();
+            
             // funcStack.pop();
             break;
 
