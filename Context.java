@@ -407,6 +407,7 @@ class Context
     public static Hash symbolHash;
     public static Stack symbolStack;
     public static Stack typeStack;
+    public static Stack funcStack;
     public static String currentStr;
     public static int currentLine;
     private boolean printSymbols;
