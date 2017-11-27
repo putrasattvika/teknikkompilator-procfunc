@@ -314,7 +314,7 @@ class Context
                 break;
 
             case 100:
-                // additional rule to set function address
+                // additional rule to set procedure and function address
                 symbolHash.find(currentStr).setFuncAddr(Generate.cell);
                 break;
 
