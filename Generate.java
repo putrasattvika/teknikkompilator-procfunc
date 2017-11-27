@@ -733,23 +733,10 @@ class Generate
 
             // R46: construct block for calling functions
             case 46:
-                // no-op
                 break;
 
             // R47 : construct instructions for calling function
             case 47:
-                func = Context.symbolHash.find(Context.currentStr);
-                
-                HMachine.memory[cell] = HMachine.PUSH; // push return addr
-                HMachine.memory[cell+1] = cell + 5; 
-                HMachine.memory[cell+2] = HMachine.PUSH; // push func addr
-                HMachine.memory[cell+3] = func.getFuncAddr();
-                HMachine.memory[cell+4] = HMachine.BR; // branch to func
-                cell = cell + 5;
-                break;
-
-            // R48 : construct instruction for saving args for calling proc/func
-            case 48:
                 func = Context.symbolHash.find(Context.currentStr);
                 
                 HMachine.memory[cell] = HMachine.PUSH; // push return addr
@@ -781,7 +768,9 @@ class Generate
                 if (kode == Bucket.FUNCTION)
                     R(47);
                 else
+                {
                    R(32);
+                }
 
                 break;
 

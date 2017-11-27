@@ -93,8 +93,8 @@ moreArguments, declarations, moreDeclarations, declaration, funcBody,
 procBody, type, optArrayBound, parameters, moreParameters, 
 outputs, output, moreOutput, inputs, input, 
 moreInputs, optSubscript, _current, _numconst, _strconst,
-C0, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13, C14, C15, C16, C17, C18, C19, C20, 
-C21, C22, C23, C24, C25, C26, C27, C28, C29, C30, C31, C32, C33, C34, C35, C36, C37, C40,
+C0, C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13, C14, C15,
+C16, C17, C18, C19, C20, C21, C22, C23, C24, C26, C28, C29, C33, C36, C37, C40,
 C100,
 R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14,
 R15, R16, R17, R18, R19, R20, R21, R22, R23, R24, R25, R26, R27,
@@ -187,13 +187,13 @@ primary            ::= _numconst NUMCONST C9 R36
                    |   _current IDENT C6 subsOrCall ;
 
 subsOrCall         ::= C37 R49 C29 C8 C8 R50 C7
-                   |   LPAREN C33 R46 C30 arguments RPAREN C32 C8 R47 C7
+                   |   LPAREN R46 arguments RPAREN C8 R47 C7
                    |   LBRACKET C21 R40 subscript RBRACKET C8 R32 C7 ;
 
-arguments          ::= expression C34 C31 C11 R48 moreArguments ;
+arguments          ::= expression C11 R48 moreArguments ;
 
 moreArguments      ::= 
-                   |   LISTSEP expression C34 C31 C11 R48 moreArguments ;
+                   |   LISTSEP expression C11 R48 moreArguments ;
  
 declarations       ::= declaration moreDeclarations 
                    |   error moreDeclarations;
@@ -206,7 +206,7 @@ declaration        ::= VAR _current IDENT C3 C4 optArrayBound AS type C5 C11 C7
                    |   PROC _current IDENT C3 C24 R7 C22 C100 C0 R1 procBody ;
 
 funcBody           ::= EQ expression C36 C11 C11 C2 R6 R43 R9 C7
-                   |   LPAREN C30 parameters C35 C1 RPAREN EQ expression C36 C11 C11 C27 R6 R43 R9 C7 ;
+                   |   LPAREN parameters C1 RPAREN EQ expression C11 C11 R6 R43 R9 C7 ;
  
 procBody           ::= scope C2 R5 R42 R9 C7
                    |   LPAREN parameters C1 RPAREN scope R5 R42 R9 C7 ;
@@ -217,10 +217,10 @@ type               ::= INT C9
 optArrayBound      ::= C18 R37
                    |   LBRACKET simpleExpression C12 C11 R39 RBRACKET C19;
 
-parameters         ::= _current IDENT C3 C4 C25 AS type C5 C11 C7 C34 moreParameters ;
+parameters         ::= _current IDENT C3 C4 AS type C5 C11 C7 moreParameters ;
 
 moreParameters     ::= 
-                   |   LISTSEP _current IDENT C3 C4 C25 AS type C5 C11 C7 C34 moreParameters ;
+                   |   LISTSEP _current IDENT C3 C4 AS type C5 C11 C7 moreParameters ;
 
 outputs            ::= output moreOutput R30 ;
 
