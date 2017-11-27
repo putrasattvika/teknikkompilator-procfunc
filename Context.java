@@ -247,6 +247,13 @@ class Context
                 symbolStack.push(currentStr);
                 break;
             
+            case 25:
+                // insert parameter to symbol table / set idKind as parameter
+                symbolHash.insert(new Bucket(currentStr));
+                symbolHash.find(currentStr).setIdKind(Bucket.PARAMETER);
+                orderNumber++;
+                break;
+            
             case 26:
                 // insert function to symbol table
                 if (symbolHash.isExist(currentStr, lexicalLevel)) {
@@ -262,6 +269,12 @@ class Context
                 symbolHash.find(currentStr).setArgc(0);
 
                 symbolStack.push(currentStr);
+                break;
+
+            case 27:
+                // Get out of params scope
+                symbolHash.delete(lexicalLevel);
+                lexicalLevel--;
                 break;
 
             case 28:
@@ -284,12 +297,40 @@ class Context
                 }
                 break;
 
+            case 30:
+                // push number of argument = 0
+                symbolHash.find(currentStr).setArgc(0);
+                symbolStack.push(currentStr);
+                break;
+
+            case 31:
+                // check argument about params
+                // TODO
+                break;
+
+            case 32:
+                // check wheter all arguments has been seen, pop number of args
+                // TODO
+                break;
+
             case 33:
                 // checks whether entry in symbol table is a function or not
                 if (symbolHash.find((String)symbolStack.peek()).getIdKind() != Bucket.FUNCTION) {
                     System.out.println("Function expected at line " + currentLine + ": " + currentStr);
                     errorCount++;
                 }   
+                break;
+
+            case 34:
+                // add number of argument
+                int count = symbolHash.find((String)symbolStack.peek()).getArgc() + 1;
+                symbolHash.find((String)symbolStack.peek()).setArgc(count);
+                break;
+
+            case 35:
+                // insert number of arguments (params) to symbol table, pop number of arguments
+                symbolHash.insert(symbolHash.find((String)symbolStack.peek()).getArgc());
+                symbolStack.pop(symbolHash.find((String)symbolStack.peek()).getArgc());
                 break;
 
             case 36:

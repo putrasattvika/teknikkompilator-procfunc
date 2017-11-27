@@ -754,6 +754,10 @@ class Generate
                 cell = cell + 5;
                 break;
 
+            // R48 : construct instruction for saving args for calling proc/func
+            case 48:
+                break;
+
             // R49 : construct instructions similar to R31
             //       for non-function identifier
             case 49:

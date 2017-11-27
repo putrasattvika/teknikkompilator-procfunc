@@ -158,7 +158,8 @@ class Bucket
     public static final int ARRAY = 1;
     public static final int PROCEDURE = 2;
     public static final int FUNCTION = 3;
-
+    public static final int PARAMETER = 4;
+    
     private String idName;
     private int orderNum;
     private int lexicLev;
