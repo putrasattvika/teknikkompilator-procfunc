@@ -237,7 +237,6 @@ class Generate
             //      contruct instructions to enter statement's scope
             case 1:
                 ll = Context.lexicalLevel;
-                org_cell = cell;
 
                 if (ll > HMachine.displaySize) {
                     System.out.println("Too many nested scope.");
@@ -251,12 +250,6 @@ class Generate
 
                     cell = cell + 6;
                     stackPush(scopeMarker, dynamicArrayStack);
-                }
-
-                // if a function/procedure, add cell as func/proc address
-                func = Context.symbolHash.find(Context.currentStr, Context.lexicalLevel-1);
-                if (func != null) {
-                    func.setFuncAddr(org_cell);
                 }
 
                 break;
