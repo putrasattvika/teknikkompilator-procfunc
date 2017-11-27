@@ -16,15 +16,16 @@ package TeknikKompilator;
 
 import java.util.Stack;
 
-class Context
-{
-    public Context()
-    {
+import com.sun.org.apache.xml.internal.serializer.ElemDesc;
+
+class Context {
+    public Context() {
         lexicalLevel = -1;
         orderNumber = 0;
         symbolHash = new Hash(HASH_SIZE);
         symbolStack = new Stack();
         typeStack = new Stack();
+        funcStack = new Stack();
         printSymbols = false;
         errorCount = 0;
     }
@@ -34,330 +35,331 @@ class Context
      * @input : ruleNo(type:int)
      * @output: -(type:void)
      */
-    public void C(int ruleNo)
-    {
+    public void C(int ruleNo) {
         boolean error = false;
 
         //System.out.println("C" + ruleNo);
-        switch(ruleNo)
-        {
-            case 0:
-                lexicalLevel++;
-                orderNumber = 0;
-                break;
+        switch (ruleNo) {
+        case 0:
+            lexicalLevel++;
+            orderNumber = 0;
+            break;
 
-            case 1:
-                if (printSymbols)
-                    symbolHash.print(lexicalLevel);
-                break;
+        case 1:
+            if (printSymbols)
+                symbolHash.print(lexicalLevel);
+            break;
 
-            case 2:
-                symbolHash.delete(lexicalLevel);
-                lexicalLevel--;
-                break;
+        case 2:
+            symbolHash.delete(lexicalLevel);
+            lexicalLevel--;
+            break;
 
-            case 3:
-                if (symbolHash.isExist(currentStr, lexicalLevel))
-                {
-                    System.out.println("Variable declared at line " + currentLine + ": " + currentStr);
-                    errorCount++;
-                    System.err.println("\nProcess terminated.\nAt least " + (errorCount + parser.yylex.num_error)
-                                       + " error(s) detected.");
-                    System.exit(1);
-                }
-                else
-                {
-                    symbolHash.insert(new Bucket(currentStr));
-                }
-                symbolStack.push(currentStr);
-                break;
-
-            case 4:
-                symbolHash.find(currentStr).setLLON(lexicalLevel, orderNumber);
-                break;
-
-            case 5:
-                symbolHash.find(currentStr).setIdType(((Integer)typeStack.peek()).intValue());
-                break;
-
-            case 6:
-                if (!symbolHash.isExist(currentStr))
-                {
-                    System.out.println("Variable undeclared at line " + currentLine + ": " + currentStr);
-                    errorCount++;
-                    System.err.println("\nProcess terminated.\nAt least " + (errorCount + parser.yylex.num_error)
-                                       + " error(s) detected.");
-                    System.exit(1);
-                }
-                else
-                {
-                    symbolStack.push(currentStr);
-                }
-                break;
-
-            case 7:
-                symbolStack.pop();
-                break;
-
-            case 8:
-                typeStack.push(new Integer(symbolHash.find(currentStr).getIdType()));
-                break;
-
-            case 9:
-                typeStack.push(new Integer(Bucket.INTEGER));
-                break;
-
-            case 10:
-                typeStack.push(new Integer(Bucket.BOOLEAN));
-                break;
-
-            case 11:
-                typeStack.pop();
-                break;
-
-            case 12:
-                switch (((Integer)typeStack.peek()).intValue())
-                {
-                    case Bucket.BOOLEAN:
-                        System.out.println("Type of integer expected at line " + currentLine + ": " + currentStr);
-                        errorCount++;
-                        break;
-                    case Bucket.UNDEFINED:
-                        System.out.println("Undefined type at line " + currentLine + ": " + currentStr);
-                        errorCount++;
-                        break;
-                }
-                break;
-
-            case 13:
-                switch (((Integer)typeStack.peek()).intValue())
-                {
-                    case Bucket.INTEGER:
-                        System.out.println("Type of boolean expected at line " + currentLine + ": " + currentStr);
-                        errorCount++;
-                        break;
-                    case Bucket.UNDEFINED:
-                        System.out.println("Undefined type at line " + currentLine + ": " + currentStr);
-                        errorCount++;
-                        break;
-                }
-                break;
-
-            case 14:
-                int temp = ((Integer)typeStack.pop()).intValue();
-                if (temp != ((Integer)typeStack.peek()).intValue())
-                {
-                    System.out.println("Unmatched type at line " + currentLine + ": " + currentStr);
-                    errorCount++;
-                }
-                typeStack.push(new Integer(temp));
-                break;
-
-            case 15:
-                temp = ((Integer)typeStack.pop()).intValue();
-                if ((temp != Bucket.INTEGER) && ((Integer)typeStack.peek()).intValue() != Bucket.INTEGER)
-                {
-                    System.out.println("Unmatched type at line " + currentLine + ": " + currentStr);
-                    errorCount++;
-                }
-                typeStack.push(new Integer(temp));
-                break;
-
-            case 16:
-                temp = symbolHash.find((String)symbolStack.peek()).getIdType();
-                if (temp != ((Integer)typeStack.peek()).intValue())
-                {
-                    System.out.println("Unmatched type at line " + currentLine + ": " + currentStr);
-                    errorCount++;
-                }
-                break;
-
-            case 17:
-                temp = symbolHash.find((String)symbolStack.peek()).getIdType();
-                if (temp != Bucket.INTEGER)
-                {
-                    System.out.println("Type of integer expected at line " + currentLine + ": " + currentStr);
-                    errorCount++;
-                }
-                break;
-
-            case 18:
-                symbolHash.find(currentStr).setIdKind(Bucket.SCALAR);
-                orderNumber++;
-                break;
-
-            case 19:
-                symbolHash.find(currentStr).setIdKind(Bucket.ARRAY);
-                orderNumber += 3;
-                break;
-
-            case 20:
-                switch (symbolHash.find((String)symbolStack.peek()).getIdKind())
-                {
-                    case Bucket.UNDEFINED:
-                        System.out.println("Variable not fully defined at line " + currentLine + ": " + currentStr);
-                        errorCount++;
-                        break;
-                    case Bucket.ARRAY:
-                        System.out.println("Scalar variable expected at line " + currentLine + ": " + currentStr);
-                        errorCount++;
-                        break;
-                }
-                break;
-
-            case 21:
-                switch (symbolHash.find((String)symbolStack.peek()).getIdKind())
-                {
-                    case Bucket.UNDEFINED:
-                        System.out.println("Variable not fully defined at line " + currentLine + ": " + currentStr);
-                        errorCount++;
-                        break;
-                    case Bucket.SCALAR:
-                        System.out.println("Array variable expected at line " + currentLine + ": " + currentStr);
-                        errorCount++;
-                        break;
-                }
-                break;
-
-            case 22:
-                symbolHash.find(currentStr).setLLON(lexicalLevel, orderNumber);
-                orderNumber++;
-
-                break;
-            
-            case 23:
-                // implemented in C5
-                break;
-            
-            case 24:
-                // insert procedure to symbol table, set type and kind
-                if (symbolHash.isExist(currentStr, lexicalLevel)) {
-                    System.out.println("Procedure declared at line " + currentLine + ": " + currentStr);
-                    errorCount++;
-                    System.err.println("\nProcess terminated.\nAt least " + (errorCount + parser.yylex.num_error)
-                                       + " error(s) detected.");
-                    System.exit(1);
-                }
-
-                // symbolHash.insert(new Bucket(currentStr));
-                symbolHash.find(currentStr).setIdType(Bucket.UNDEFINED);
-                symbolHash.find(currentStr).setIdKind(Bucket.PROCEDURE);
-                symbolHash.find(currentStr).setArgc(0);
-                
-                symbolStack.push(currentStr);
-                break;
-            
-            case 25:
-                // insert parameter to symbol table / set idKind as parameter
+        case 3:
+            if (symbolHash.isExist(currentStr, lexicalLevel)) {
+                System.out.println("Variable declared at line " + currentLine + ": " + currentStr);
+                errorCount++;
+                System.err.println("\nProcess terminated.\nAt least " + (errorCount + parser.yylex.num_error)
+                        + " error(s) detected.");
+                System.exit(1);
+            } else {
                 symbolHash.insert(new Bucket(currentStr));
-                symbolHash.find(currentStr).setIdKind(Bucket.PARAMETER);
-                orderNumber++;
-                break;
-            
-            case 26:
-                // insert function to symbol table
-                if (symbolHash.isExist(currentStr, lexicalLevel)) {
-                    System.out.println("Function declared at line " + currentLine + ": " + currentStr);
-                    errorCount++;
-                    System.err.println("\nProcess terminated.\nAt least " + (errorCount + parser.yylex.num_error)
-                                       + " error(s) detected.");
-                    System.exit(1);
-                }
+            }
+            symbolStack.push(currentStr);
+            break;
 
-                symbolHash.find(currentStr).setIdType(Bucket.UNDEFINED);
-                symbolHash.find(currentStr).setIdKind(Bucket.FUNCTION);
-                symbolHash.find(currentStr).setArgc(0);
+        case 4:
+            symbolHash.find(currentStr).setLLON(lexicalLevel, orderNumber);
+            break;
 
+        case 5:
+            symbolHash.find(currentStr).setIdType(((Integer) typeStack.peek()).intValue());
+            break;
+
+        case 6:
+            if (!symbolHash.isExist(currentStr)) {
+                System.out.println("Variable undeclared at line " + currentLine + ": " + currentStr);
+                errorCount++;
+                System.err.println("\nProcess terminated.\nAt least " + (errorCount + parser.yylex.num_error)
+                        + " error(s) detected.");
+                System.exit(1);
+            } else {
                 symbolStack.push(currentStr);
-                break;
+            }
+            break;
 
-            case 27:
-                // Get out of params scope
-                symbolHash.delete(lexicalLevel);
-                lexicalLevel--;
-                break;
+        case 7:
+            symbolStack.pop();
+            break;
 
-            case 28:
-                // check whether identifier is a procedure
-                if (symbolHash.find((String)symbolStack.peek()).getIdKind() != Bucket.PROCEDURE) {
-                    System.out.println("Procedure expected at line " + currentLine + ": " + currentStr);
+        case 8:
+            typeStack.push(new Integer(symbolHash.find(currentStr).getIdType()));
+            break;
+
+        case 9:
+            typeStack.push(new Integer(Bucket.INTEGER));
+            break;
+
+        case 10:
+            typeStack.push(new Integer(Bucket.BOOLEAN));
+            break;
+
+        case 11:
+            typeStack.pop();
+            break;
+
+        case 12:
+            switch (((Integer) typeStack.peek()).intValue()) {
+            case Bucket.BOOLEAN:
+                System.out.println("Type of integer expected at line " + currentLine + ": " + currentStr);
+                errorCount++;
+                break;
+            case Bucket.UNDEFINED:
+                System.out.println("Undefined type at line " + currentLine + ": " + currentStr);
+                errorCount++;
+                break;
+            }
+            break;
+
+        case 13:
+            switch (((Integer) typeStack.peek()).intValue()) {
+            case Bucket.INTEGER:
+                System.out.println("Type of boolean expected at line " + currentLine + ": " + currentStr);
+                errorCount++;
+                break;
+            case Bucket.UNDEFINED:
+                System.out.println("Undefined type at line " + currentLine + ": " + currentStr);
+                errorCount++;
+                break;
+            }
+            break;
+
+        case 14:
+            int temp = ((Integer) typeStack.pop()).intValue();
+            if (temp != ((Integer) typeStack.peek()).intValue()) {
+                System.out.println("Unmatched type at line " + currentLine + ": " + currentStr);
+                errorCount++;
+            }
+            typeStack.push(new Integer(temp));
+            break;
+
+        case 15:
+            temp = ((Integer) typeStack.pop()).intValue();
+            if ((temp != Bucket.INTEGER) && ((Integer) typeStack.peek()).intValue() != Bucket.INTEGER) {
+                System.out.println("Unmatched type at line " + currentLine + ": " + currentStr);
+                errorCount++;
+            }
+            typeStack.push(new Integer(temp));
+            break;
+
+        case 16:
+            temp = symbolHash.find((String) symbolStack.peek()).getIdType();
+            if (temp != ((Integer) typeStack.peek()).intValue()) {
+                System.out.println("Unmatched type at line " + currentLine + ": " + currentStr);
+                errorCount++;
+            }
+            break;
+
+        case 17:
+            temp = symbolHash.find((String) symbolStack.peek()).getIdType();
+            if (temp != Bucket.INTEGER) {
+                System.out.println("Type of integer expected at line " + currentLine + ": " + currentStr);
+                errorCount++;
+            }
+            break;
+
+        case 18:
+            symbolHash.find(currentStr).setIdKind(Bucket.SCALAR);
+            orderNumber++;
+            break;
+
+        case 19:
+            symbolHash.find(currentStr).setIdKind(Bucket.ARRAY);
+            orderNumber += 3;
+            break;
+
+        case 20:
+            switch (symbolHash.find((String) symbolStack.peek()).getIdKind()) {
+            case Bucket.UNDEFINED:
+                System.out.println("Variable not fully defined at line " + currentLine + ": " + currentStr);
+                errorCount++;
+                break;
+            case Bucket.ARRAY:
+                System.out.println("Scalar variable expected at line " + currentLine + ": " + currentStr);
+                errorCount++;
+                break;
+            }
+            break;
+
+        case 21:
+            switch (symbolHash.find((String) symbolStack.peek()).getIdKind()) {
+            case Bucket.UNDEFINED:
+                System.out.println("Variable not fully defined at line " + currentLine + ": " + currentStr);
+                errorCount++;
+                break;
+            case Bucket.SCALAR:
+                System.out.println("Array variable expected at line " + currentLine + ": " + currentStr);
+                errorCount++;
+                break;
+            }
+            break;
+
+        case 22:
+            symbolHash.find(currentStr).setLLON(lexicalLevel, orderNumber);
+            orderNumber++;
+
+            break;
+
+        case 23:
+            // implemented in C5
+            break;
+
+        case 24:
+            // insert procedure to symbol table, set type and kind
+            if (symbolHash.isExist(currentStr, lexicalLevel)) {
+                System.out.println("Procedure declared at line " + currentLine + ": " + currentStr);
+                errorCount++;
+                System.err.println("\nProcess terminated.\nAt least " + (errorCount + parser.yylex.num_error)
+                        + " error(s) detected.");
+                System.exit(1);
+            }
+
+            // symbolHash.insert(new Bucket(currentStr));
+            symbolHash.find(currentStr).setIdType(Bucket.UNDEFINED);
+            symbolHash.find(currentStr).setIdKind(Bucket.PROCEDURE);
+            symbolHash.find(currentStr).setArgc(0);
+
+            symbolStack.push(currentStr);
+            break;
+
+        case 25:
+            // insert parameter to symbol table / set idKind as parameter
+            symbolHash.insert(new Bucket(currentStr));
+            symbolHash.find(currentStr).setIdKind(Bucket.PARAMETER);
+            orderNumber++;
+            break;
+
+        case 26:
+            // insert function to symbol table
+            if (symbolHash.isExist(currentStr, lexicalLevel)) {
+                System.out.println("Function declared at line " + currentLine + ": " + currentStr);
+                errorCount++;
+                System.err.println("\nProcess terminated.\nAt least " + (errorCount + parser.yylex.num_error)
+                        + " error(s) detected.");
+                System.exit(1);
+            }
+
+            symbolHash.find(currentStr).setIdType(Bucket.UNDEFINED);
+            symbolHash.find(currentStr).setIdKind(Bucket.FUNCTION);
+            symbolHash.find(currentStr).setArgc(0);
+
+            symbolStack.push(currentStr);
+            break;
+
+        case 27:
+            // Get out of params scope
+            C(2);
+            break;
+
+        case 28:
+            // check whether identifier is a procedure
+            if (symbolHash.find((String) symbolStack.peek()).getIdKind() != Bucket.PROCEDURE) {
+                System.out.println("Procedure expected at line " + currentLine + ": " + currentStr);
+                errorCount++;
+            }
+            break;
+
+        case 29:
+            // check whether function or procedure doesn't have any args
+            // context: function or procedure w/o args
+            temp = symbolHash.find((String) symbolStack.peek()).getIdKind();
+            if (temp == Bucket.PROCEDURE || temp == Bucket.FUNCTION) {
+                if (symbolHash.find((String) symbolStack.peek()).getArgc() != 0) {
+                    System.out.println("Procedure without arguments " + currentLine + ": " + currentStr);
                     errorCount++;
                 }
-                break;
+            }
+            break;
 
-            case 29:
-                // check whether function or procedure doesn't have any args
-                // context: function or procedure w/o args
-                temp = symbolHash.find((String)symbolStack.peek()).getIdKind();
-                if (temp == Bucket.PROCEDURE || temp == Bucket.FUNCTION) {
-                    if (symbolHash.find((String)symbolStack.peek()).getArgc() != 0) {
-                        System.out.println("Procedure without arguments " + currentLine + ": " + currentStr);
-                        errorCount++;
-                    }
+        case 30:
+            // push number of argument = 0
+            symbolHash.find(currentStr).setArgc(0);
+            funcStack.push(currentStr);
+            break;
+
+        case 31:
+            // check argument about params
+            if (symbolHash.find((String) symbolStack.peek()).getArgc() < 1) {
+                System.out.println("debug: Function have no argument " + currentLine + ": " + currentStr);
+                errorCount++;
+            } else {
+                System.out.println("debug: Function have argument " + currentLine + ": " + currentStr);
+                // symbolStack.pop();
+                temp = symbolHash.find((String) symbolStack.peek()).getIdKind();
+                if (temp == Bucket.INTEGER || temp == Bucket.BOOLEAN) {
+
                 }
-                break;
+            }
+            break;
 
-            case 30:
-                // push number of argument = 0
-                symbolHash.find(currentStr).setArgc(0);
-                symbolStack.push(currentStr);
-                break;
+        case 32:
+            // check wheter all arguments has been seen, pop number of args
+            if (symbolHash.find((String) symbolStack.peek()).getArgc() == 0) {
+                symbolStack.pop();
+            } else {
+                System.out.println("debug: Not all arguments are checked " + currentLine + ": " + currentStr);
+                errorCount++;
+            }
+            break;
 
-            case 31:
-                // check argument about params
-                // TODO
-                break;
+        case 33:
+            // checks whether entry in symbol table is a function or not
+            if (symbolHash.find((String) symbolStack.peek()).getIdKind() != Bucket.FUNCTION) {
+                System.out.println("Function expected at line " + currentLine + ": " + currentStr);
+                errorCount++;
+            }
+            break;
 
-            case 32:
-                // check wheter all arguments has been seen, pop number of args
-                // TODO
-                break;
+        case 34:
+            // add number of argument
+            symbolHash.find((String) funcStack.peek())
+                    .setArgc(symbolHash.find((String) funcStack.peek()).getArgc() + 1);
+            break;
 
-            case 33:
-                // checks whether entry in symbol table is a function or not
-                if (symbolHash.find((String)symbolStack.peek()).getIdKind() != Bucket.FUNCTION) {
-                    System.out.println("Function expected at line " + currentLine + ": " + currentStr);
-                    errorCount++;
-                }   
-                break;
+        case 35:
+            // insert number of arguments (params) to symbol table, pop number of arguments
+            symbolHash.insert(new Bucket((String) funcStack.pop()));
+            symbolStack.pop();
+            // funcStack.pop();
+            break;
 
-            case 34:
-                // add number of argument
-                int count = symbolHash.find((String)symbolStack.peek()).getArgc() + 1;
-                symbolHash.find((String)symbolStack.peek()).setArgc(count);
-                break;
+        case 36:
+            // checks whether return type matches expression in the function
+            if (symbolHash.find((String) symbolStack.peek()).getIdType() != ((Integer) typeStack.peek()).intValue()) {
+                System.out.println("Return type does not match at line " + currentLine + ": " + currentStr);
+                errorCount++;
+            }
+            typeStack.push(new Integer(((Integer) typeStack.peek()).intValue())); // adds to type stack
+            break;
 
-            case 35:
-                // insert number of arguments (params) to symbol table, pop number of arguments
-                symbolHash.insert(symbolHash.find((String)symbolStack.peek()).getArgc());
-                symbolStack.pop(symbolHash.find((String)symbolStack.peek()).getArgc());
-                break;
+        case 37:
+            // checks whether identifier is a function or not
+            // if so, go to C33
+            // otherwise, go to C20, treat it as a scalar
+            if (symbolHash.find((String) symbolStack.peek()).getIdKind() == Bucket.FUNCTION)
+                C(33);
+            else
+                C(20);
+            break;
 
-            case 36:
-                // checks whether return type matches expression in the function
-                if (symbolHash.find((String)symbolStack.peek()).getIdType() != ((Integer)typeStack.peek()).intValue()) {
-                    System.out.println("Return type does not match at line " + currentLine + ": " + currentStr);
-                    errorCount++;
-                }
-                typeStack.push(new Integer(((Integer)typeStack.peek()).intValue())); // adds to type stack
-                break;
-            
-            case 37:
-                // checks whether identifier is a function or not
-                // if so, go to C33
-                // otherwise, go to C20, treat it as a scalar
-                if(symbolHash.find((String)symbolStack.peek()).getIdKind()==Bucket.FUNCTION) C(33);
-                else C(20);
-                break;
-            
-            case 40:
-                // already handled in C9 (int), C10 (bool)
-                break;
+        case 40:
+            // already handled in C9 (int), C10 (bool)
+            break;
 
-            case 100:
-                // additional rule to set procedure and function address
-                symbolHash.find(currentStr).setFuncAddr(Generate.cell);
-                break;
+        case 100:
+            // additional rule to set procedure and function address
+            symbolHash.find(currentStr).setFuncAddr(Generate.cell);
+            break;
 
         }
     }
@@ -367,8 +369,7 @@ class Context
      * @input : str(type:int), line(type:int)
      * @output: -(type:void)
      */
-    public void setCurrent(String str, int line)
-    {
+    public void setCurrent(String str, int line) {
         currentStr = str;
         currentLine = line;
     }
@@ -378,8 +379,7 @@ class Context
      * @input : bool(type:boolean)
      * @output: -(type:void)
      */
-    public void setPrint(boolean bool)
-    {
+    public void setPrint(boolean bool) {
         printSymbols = bool;
     }
 
@@ -390,6 +390,7 @@ class Context
     public static Hash symbolHash;
     public static Stack symbolStack;
     public static Stack typeStack;
+    public static Stack funcStack;
     public static String currentStr;
     public static int currentLine;
     private boolean printSymbols;

@@ -139,6 +139,9 @@ class Bucket
             case UNDEFINED:
                 kind = "undefined";
                 break;
+            case PARAMETER:
+                kind = "parameter";
+                break;
         }
 
         return kind;
