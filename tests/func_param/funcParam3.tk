@@ -1,0 +1,23 @@
+{
+    var n: integer
+    var f[20]: integer
+    proc fib {
+            var i: integer
+            var dummy[20]: integer
+            integer func sum(x: integer, y: integer) = x+y;
+            
+            i := 2
+            repeat
+                    f[i] := sum(f[i-1], f[i-2])
+                    put f[i]
+                    i := i + 1
+            until i > 19
+    }
+    ;
+    
+    n := 19
+    f[0] := 1
+    f[1] := 1
+    
+    fib
+}

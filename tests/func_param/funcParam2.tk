@@ -1,0 +1,16 @@
+{
+	var a: integer
+	var c: boolean
+	integer func e = 4
+	integer func f(x: integer, y: integer) = x + y
+	integer func g(z: integer) = f(z, z)
+	;
+
+	a := 5
+	put a
+	put e
+	put f(a, 100)
+	put g(a)
+	put g(f(a, 100))
+	put f(g(a), g(1))
+}

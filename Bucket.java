@@ -1,5 +1,8 @@
 package TeknikKompilator;
 
+import java.util.List;
+import java.util.ArrayList;
+
 class Bucket
 {
     public Bucket()
@@ -51,6 +54,10 @@ class Bucket
         this.argc = argc;
     }
 
+    public void addArgs(Bucket arg) {
+        this.args.add(arg);
+    }
+
     public void setFuncAddr(int funcAddr) {
         this.funcAddr = funcAddr;
     }
@@ -92,6 +99,10 @@ class Bucket
 
     public int getArgc() {
         return argc;
+    }
+
+    public List<Bucket> getArgs() {
+        return args;
     }
 
     public int getFuncAddr() {
@@ -172,4 +183,5 @@ class Bucket
     private int funcAddr;
 
     private int argc = -1;
+    private ArrayList<Bucket> args = new ArrayList<>();
 }

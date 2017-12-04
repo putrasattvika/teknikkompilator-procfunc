@@ -38,6 +38,7 @@ class Context
     public void C(int ruleNo)
     {
         boolean error = false;
+        Bucket tempBucket = null;
 
         //System.out.println("C" + ruleNo);
         switch(ruleNo)
@@ -250,8 +251,11 @@ class Context
 
             case 25:
                 // insert parameter to symbol table / set idKind as parameter
-                symbolHash.insert(new Bucket(currentStr));
                 symbolHash.find(currentStr).setIdKind(Bucket.PARAMETER);
+                symbolHash
+                    .find((String) funcStack.peek())
+                    .addArgs(symbolHash.find(currentStr));
+
                 orderNumber++;
                 break;
 
@@ -299,33 +303,31 @@ class Context
 
             case 30:
                 // push number of argument = 0
-                symbolHash.find(currentStr).setArgc(0);
-                funcStack.push(currentStr);
+                currentNumberOfArgs = 0;
                 break;
 
             case 31:
                 // check argument about params
                 if (symbolHash.find((String) symbolStack.peek()).getArgc() < 1) {
-                    System.out.println("debug: Function have no argument " + currentLine + ": " + currentStr);
+                    System.out.println("Function have no argument " + currentLine + ": " + currentStr);
+                    System.out.printf("  func %s at %s\n", currentStr, symbolHash.find((String) symbolStack.peek()));
                     errorCount++;
-                } else {
-                    System.out.println("debug: Function have argument " + currentLine + ": " + currentStr);
-                    // symbolStack.pop();
-                    temp = symbolHash.find((String) symbolStack.peek()).getIdKind();
-                    if (temp == Bucket.INTEGER || temp == Bucket.BOOLEAN) {
-
+                } else {                    
+                    tempBucket = symbolHash.find((String) funcStack.peek()).getArgs().get(currentNumberOfArgs-1);
+                    
+                    if (tempBucket.getIdType() != ((Integer)typeStack.peek()).intValue()) {
+                        System.out.printf("Error on calling %s at %d\n", funcStack.peek(), currentLine);
+                        System.out.printf("  wrong argument type: expected %d, got %d\n", tempBucket.getIdType(), typeStack.peek());
+                        errorCount++;
                     }
+
+                    typeStack.pop();
                 }
                 break;
 
             case 32:
                 // check wheter all arguments has been seen, pop number of args
-                if (symbolHash.find((String) symbolStack.peek()).getArgc() == 0) {
-                    symbolStack.pop();
-                } else {
-                    System.out.println("debug: Not all arguments are checked " + currentLine + ": " + currentStr);
-                    errorCount++;
-                }
+                currentNumberOfArgs = 0;
                 break;
 
             case 33:
@@ -333,21 +335,20 @@ class Context
                 if (symbolHash.find((String)symbolStack.peek()).getIdKind() != Bucket.FUNCTION) {
                     System.out.println("Function expected at line " + currentLine + ": " + currentStr);
                     errorCount++;
-                }   
+                }
+
+                funcStack.push(currentStr);
                 break;
 
             case 34:
                 // add number of argument
-                symbolHash.find((String) funcStack.peek())
-                        .setArgc(symbolHash.find((String) funcStack.peek()).getArgc() + 1);
+                currentNumberOfArgs += 1;
                 break;
 
             case 35:
                 // insert number of arguments (params) to symbol table, pop number of arguments
-                symbolHash.insert(new Bucket((String) funcStack.pop()));
-                symbolStack.pop();
-
-                // funcStack.pop();
+                symbolHash.find((String) funcStack.peek()).setArgc(currentNumberOfArgs);
+                currentNumberOfArgs = 0;
                 break;
 
             case 36:
@@ -363,8 +364,11 @@ class Context
                 // checks whether identifier is a function or not
                 // if so, go to C33
                 // otherwise, go to C20, treat it as a scalar
-                if(symbolHash.find((String)symbolStack.peek()).getIdKind()==Bucket.FUNCTION) C(33);
-                else C(20);
+                if(symbolHash.find((String)symbolStack.peek()).getIdKind()==Bucket.FUNCTION) {
+                    C(33);
+                } else {
+                    C(20);
+                }
                 break;
             
             case 40:
@@ -374,6 +378,26 @@ class Context
             case 100:
                 // additional rule to set procedure and function address
                 symbolHash.find(currentStr).setFuncAddr(Generate.cell);
+                break;
+
+            case 101:
+                // save function/procedure name to stack
+                funcStack.push(currentStr);
+                break;
+
+            case 102:
+                // remove function/procedure name from stack
+                funcStack.pop();
+                break;
+
+            case 103:
+                // fix function actual parameter order number
+                temp = ((Bucket)symbolHash.find(((String)funcStack.peek()))).getArgc();
+
+                for (int i = 0; i < temp; i++) {
+                    tempBucket = ((Bucket)symbolHash.find(((String)funcStack.peek()))).getArgs().get(i);
+                    tempBucket.setLLON(tempBucket.getLexicLev(), -(3 + temp - i));
+                }
                 break;
 
         }
@@ -410,6 +434,7 @@ class Context
     public static Stack funcStack;
     public static String currentStr;
     public static int currentLine;
+    public static int currentNumberOfArgs = 0;
     private boolean printSymbols;
     public int errorCount;
 }
