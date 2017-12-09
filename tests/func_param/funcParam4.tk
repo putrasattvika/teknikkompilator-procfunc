@@ -1,6 +1,6 @@
 {
-    var i: integer
-    integer func fib = {
+    var k: integer
+    integer func fib(i: integer) = {
             var j: integer
             var f[20]: integer
             integer func sum(x: integer, y: integer) = x+y;
@@ -18,9 +18,9 @@
     }
     ;
 
-    i := 0
+    k := 0
     repeat
-        put fib
-        i := i + 1
-    until i > 19
+        put fib(k)
+        k := k + 1
+    until k > 19
 }
