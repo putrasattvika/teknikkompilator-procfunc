@@ -249,7 +249,6 @@ class Generate
                     HMachine.memory[cell+5] = ll;
 
                     cell = cell + 6;
-                    stackPush(scopeMarker, dynamicArrayStack);
                 }
 
                 break;
@@ -272,7 +271,6 @@ class Generate
                     HMachine.memory[cell+7] = ll;
 
                     cell = cell + 8;
-                    stackPush(scopeMarker, dynamicArrayStack);
                  }
 
                 break;
@@ -280,8 +278,10 @@ class Generate
             // R3 : construct instructions to allocate variable
             case 3:
                 on = stackPop(dynamicArrayStack, on);
+                // System.out.printf("(R3) ON=%s, scopeMarker=%s\n", on, scopeMarker);
                 while (!(on == scopeMarker))
                 {
+                    // System.out.printf("     Creating array w/ ON=%s, scopeMarker=%s\n", on, scopeMarker);
                     HMachine.memory[cell] = HMachine.PUSHMT;
                     HMachine.memory[cell+1] = HMachine.NAME;
                     HMachine.memory[cell+2] = Context.lexicalLevel;
@@ -650,6 +650,7 @@ class Generate
             case 40:
                 ll = Context.symbolHash.find(Context.currentStr).getLexicLev();
                 on = Context.symbolHash.find(Context.currentStr).getOrderNum();
+                // System.out.printf("(R40) getting array address of %s [%d, %d]\n", Context.currentStr, ll, on);
 
                 HMachine.memory[cell] = HMachine.NAME;
                 HMachine.memory[cell+1] = ll;
@@ -700,6 +701,22 @@ class Generate
 
             // R42 : construct instructions for returning from called procedure
             case 42:
+                func = Context.symbolHash.find((String) Context.funcStack.peek());
+
+                // clean up args
+                if (func.getArgc() > 0) {
+                    // retaddr to topmost
+                    HMachine.memory[cell+0] = HMachine.PUSHMT;
+                    HMachine.memory[cell+1] = HMachine.PUSH;
+                    HMachine.memory[cell+2] = func.getArgc() + 1;
+                    HMachine.memory[cell+3] = HMachine.SUB;
+                    HMachine.memory[cell+4] = HMachine.FLIP;
+                    HMachine.memory[cell+5] = HMachine.STORE;
+
+                    cell += 6;
+                }
+
+                // return
                 HMachine.memory[cell+0] = HMachine.BR;
                 cell = cell + 1;
                 break;
@@ -751,7 +768,7 @@ class Generate
 
             // R44 : construct instructions for calling procedures
             case 44:
-                func = Context.symbolHash.find(Context.currentStr);
+                func = Context.symbolHash.find((String)Context.funcStack.peek());
                 
                 // store RIP
                 HMachine.memory[cell+0] = HMachine.PUSH;
@@ -842,6 +859,11 @@ class Generate
             case 53:
                 stackPush(loopMarker, R51R52Stack);
                 break;
+
+            // R100 : push to dynamicArrayStack
+            case 100:
+                // System.out.printf("(R100) Pushing to dynamicArrayStack: %s\n", Context.currentStr);
+                stackPush(scopeMarker, dynamicArrayStack);
         }
     }
 

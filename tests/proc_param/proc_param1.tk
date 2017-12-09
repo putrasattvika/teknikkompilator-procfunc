@@ -1,0 +1,25 @@
+{
+	var a: integer
+	var b: integer
+
+	proc print_b {
+		;
+		put b
+	}
+
+	proc set_b(x: integer) {
+		;
+		b := x
+	}
+
+	;
+
+	b := -1
+	print_b
+
+	set_b(2)
+	print_b
+
+	set_b(100)
+	print_b
+}

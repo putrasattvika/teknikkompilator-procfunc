@@ -72,6 +72,7 @@ class Context
                     symbolHash.insert(new Bucket(currentStr));
                 }
                 symbolStack.push(currentStr);
+                // System.out.printf("(C3) Pushed symbol %s\n", currentStr);
                 break;
 
             case 4:
@@ -337,7 +338,6 @@ class Context
                     errorCount++;
                 }
 
-                funcStack.push(currentStr);
                 break;
 
             case 34:
@@ -353,10 +353,15 @@ class Context
 
             case 36:
                 // checks whether return type matches expression in the function
+                // System.out.printf("(C36) line=%s %s\n", currentLine, currentStr);
+                // System.out.printf("(C36) symbolStack=%s\n", (String)symbolStack.peek());
+                // System.out.printf("(C36) symbolHash=%s\n", symbolHash.find((String)symbolStack.peek()));
                 if (symbolHash.find((String)symbolStack.peek()).getIdType() != ((Integer)typeStack.peek()).intValue()) {
                     System.out.println("Return type does not match at line " + currentLine + ": " + currentStr);
                     errorCount++;
                 }
+
+                symbolStack.pop();
                 typeStack.push(new Integer(((Integer)typeStack.peek()).intValue())); // adds to type stack
                 break;
             
@@ -400,6 +405,15 @@ class Context
                 }
                 break;
 
+            case 104:
+                // fix procedure actual parameter order number
+                temp = ((Bucket)symbolHash.find(((String)funcStack.peek()))).getArgc();
+
+                for (int i = 0; i < temp; i++) {
+                    tempBucket = ((Bucket)symbolHash.find(((String)funcStack.peek()))).getArgs().get(i);
+                    tempBucket.setLLON(tempBucket.getLexicLev(), -(2 + temp - i));
+                }
+                break;
         }
     }
 

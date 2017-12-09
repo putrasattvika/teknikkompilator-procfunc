@@ -1,0 +1,30 @@
+{
+	var a: integer
+	var b: integer
+
+	proc print_b {
+		;
+		put b
+	}
+
+	proc set_b_plus_one(x: integer) {
+		proc set_b_plus_one(x: integer) {
+			;
+			b := x+1
+		}
+		;
+		b := x + 1
+		set_b_plus_one(x)
+	}
+
+	;
+
+	b := -1
+	print_b
+
+	set_b_plus_one(2)
+	print_b
+
+	set_b_plus_one(100)
+	print_b
+}
