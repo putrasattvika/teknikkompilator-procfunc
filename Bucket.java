@@ -1,5 +1,8 @@
 package TeknikKompilator;
 
+import java.util.List;
+import java.util.ArrayList;
+
 class Bucket
 {
     public Bucket()
@@ -51,6 +54,10 @@ class Bucket
         this.argc = argc;
     }
 
+    public void addArgs(Bucket arg) {
+        this.args.add(arg);
+    }
+
     public void setFuncAddr(int funcAddr) {
         this.funcAddr = funcAddr;
     }
@@ -92,6 +99,10 @@ class Bucket
 
     public int getArgc() {
         return argc;
+    }
+
+    public List<Bucket> getArgs() {
+        return args;
     }
 
     public int getFuncAddr() {
@@ -139,6 +150,9 @@ class Bucket
             case UNDEFINED:
                 kind = "undefined";
                 break;
+            case PARAMETER:
+                kind = "parameter";
+                break;
         }
 
         return kind;
@@ -158,7 +172,8 @@ class Bucket
     public static final int ARRAY = 1;
     public static final int PROCEDURE = 2;
     public static final int FUNCTION = 3;
-
+    public static final int PARAMETER = 4;
+    
     private String idName;
     private int orderNum;
     private int lexicLev;
@@ -168,4 +183,5 @@ class Bucket
     private int funcAddr;
 
     private int argc = -1;
+    private ArrayList<Bucket> args = new ArrayList<>();
 }

@@ -706,6 +706,44 @@ class Generate
             
             // R43 : construct instructions for returning from called function
             case 43:
+                func = Context.symbolHash.find((String) Context.funcStack.peek());
+
+                // clean up args
+                if (func.getArgc() > 0) {
+                    if (func.getArgc() > 1) {
+                        // move retval to second topmost
+                        HMachine.memory[cell+0] = HMachine.PUSHMT;
+                        HMachine.memory[cell+1] = HMachine.PUSH;
+                        HMachine.memory[cell+2] = func.getArgc() + 1;
+                        HMachine.memory[cell+3] = HMachine.SUB;
+                        HMachine.memory[cell+4] = HMachine.FLIP;
+                        HMachine.memory[cell+5] = HMachine.STORE;
+
+                        // retaddr to topmost
+                        HMachine.memory[cell+6] = HMachine.PUSHMT;
+                        HMachine.memory[cell+7] = HMachine.PUSH;
+                        HMachine.memory[cell+8] = func.getArgc() + 1;
+                        HMachine.memory[cell+9] = HMachine.SUB;
+                        HMachine.memory[cell+10] = HMachine.FLIP;
+                        HMachine.memory[cell+11] = HMachine.STORE;
+
+                        cell += 12;
+                    } else {
+                        // move retval to topmost
+                        HMachine.memory[cell+0] = HMachine.PUSHMT;
+                        HMachine.memory[cell+1] = HMachine.PUSH;
+                        HMachine.memory[cell+2] = func.getArgc() + 2;
+                        HMachine.memory[cell+3] = HMachine.SUB;
+                        HMachine.memory[cell+4] = HMachine.FLIP;
+                        HMachine.memory[cell+5] = HMachine.STORE;
+
+                        // flip order
+                        HMachine.memory[cell+6] = HMachine.FLIP;
+                        cell += 7;
+                    }
+                }
+
+                // return
                 HMachine.memory[cell] = HMachine.FLIP; // flip to return value
                 HMachine.memory[cell+1] = HMachine.BR; // branch when function is done
                 cell = cell + 2;
@@ -733,11 +771,12 @@ class Generate
 
             // R46: construct block for calling functions
             case 46:
+                // no-op
                 break;
 
             // R47 : construct instructions for calling function
             case 47:
-                func = Context.symbolHash.find(Context.currentStr);
+                func = Context.symbolHash.find((String)Context.funcStack.peek());
                 
                 HMachine.memory[cell] = HMachine.PUSH; // push return addr
                 HMachine.memory[cell+1] = cell + 5; 
@@ -745,6 +784,11 @@ class Generate
                 HMachine.memory[cell+3] = func.getFuncAddr();
                 HMachine.memory[cell+4] = HMachine.BR; // branch to func
                 cell = cell + 5;
+                break;
+
+            // R48 : construct instruction for saving args for calling proc/func
+            case 48:
+                // no-op
                 break;
 
             // R49 : construct instructions similar to R31
