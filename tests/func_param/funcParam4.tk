@@ -1,0 +1,26 @@
+{
+    var i: integer
+    integer func fib = {
+            var j: integer
+            var f[20]: integer
+            integer func sum(x: integer, y: integer) = x+y;
+
+            f[0] := 1
+            f[1] := 1
+            j := 2
+            repeat
+                    f[j] := sum(f[j-1], f[j-2])
+                    j := j + 1
+            until j > i
+
+            ;
+            f[i]
+    }
+    ;
+
+    i := 0
+    repeat
+        put fib
+        i := i + 1
+    until i > 19
+}
